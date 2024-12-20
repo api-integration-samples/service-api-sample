@@ -39,7 +39,7 @@ type Usage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-var payload *Payload = nil
+var payload Payload
 
 func main() {
 
@@ -72,16 +72,16 @@ func main() {
 
 	r.POST("/payload", func(c *gin.Context) {
 
-		if payload == nil {
+		if len(payload.Choices) == 0 {
 			b, err := os.ReadFile("payload.json")
 			if err == nil {
-				json.Unmarshal(b, payload)
+				json.Unmarshal(b, &payload)
 			}
 		}
 
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
-		c.JSON(200, *payload)
+		c.JSON(200, payload)
 	})
 
 	r.POST("/payload/:sizeInMb", func(c *gin.Context) {
@@ -97,17 +97,17 @@ func main() {
 			fmt.Println("Size parameter " + sizeInMb + " greater than 20mb, using max size 20mb.")
 		}
 
-		sizeNum = sizeNum * 350
+		//sizeNum = sizeNum * 350
 
-		b, err := os.ReadFile("payload.json")
+		b, err := os.ReadFile("payload.large.json")
 		if err == nil {
 			json.Unmarshal(b, &largePayload)
 		}
-		orginalMessage := largePayload.Choices[0].Message.Content
-		for sizeNum > 0 {
-			largePayload.Choices[0].Message.Content += orginalMessage
-			sizeNum--
-		}
+		// orginalMessage := largePayload.Choices[0].Message.Content
+		// for sizeNum > 0 {
+		// 	largePayload.Choices[0].Message.Content += orginalMessage
+		// 	sizeNum--
+		// }
 
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
